@@ -115,22 +115,6 @@ output SERVICE_API_NAME string = api.outputs.name
 // Ensure output is always string, handle potential null from module output if SystemAssigned is not used
 output SERVICE_API_IDENTITY_PRINCIPAL_ID string = identityType == 'SystemAssigned' ? api.outputs.?systemAssignedMIPrincipalId ?? '' : ''
 
-// Mount Azure Files share for persisting agent session state
-resource functionApp 'Microsoft.Web/sites@2024-04-01' existing = {
-  name: name
-}
-
-resource storageMount 'Microsoft.Web/sites/config@2024-04-01' = if (!empty(sessionShareName)) {
-  parent: functionApp
-  name: 'azurestorageaccounts'
-  dependsOn: [api]
-  properties: {
-    sessionstore: {
-      type: 'AzureFiles'
-      accountName: storageAccountName
-      shareName: sessionShareName
-      mountPath: '/code-assistant-session'
-      accessKey: stg.listKeys().keys[0].value
-    }
-  }
-}
+// NOTE: Azure Files SMB mount removed because the ARM API (Microsoft.Web/sites/config/azurestorageaccounts)
+// requires an accessKey, which is incompatible with org policy disabling shared key access on the storage account.
+// Session state falls back to ephemeral local storage per instance (/tmp or ~/.copilot).

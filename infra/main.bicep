@@ -190,7 +190,7 @@ module storage 'br/public:avm/res/storage/storage-account:0.8.3' = {
   params: {
     name: !empty(storageAccountName) ? storageAccountName : '${abbrs.storageStorageAccounts}${resourceToken}'
     allowBlobPublicAccess: false
-    allowSharedKeyAccess: true // Required for Azure Files SMB mount (session state persistence)
+    allowSharedKeyAccess: false // Disabled by org policy; Azure Files mount uses managed identity
     dnsEndpointType: 'Standard'
     publicNetworkAccess: vnetEnabled ? 'Disabled' : 'Enabled'
     networkAcls: vnetEnabled ? {
@@ -233,6 +233,7 @@ module rbac './app/rbac.bicep' = {
     enableBlob: storageEndpointConfig.enableBlob
     enableQueue: storageEndpointConfig.enableQueue
     enableTable: storageEndpointConfig.enableTable
+    enableFile: storageEndpointConfig.enableFiles
     allowUserIdentityPrincipal: storageEndpointConfig.allowUserIdentityPrincipal
   }
 }
